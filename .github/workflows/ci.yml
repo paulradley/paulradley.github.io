@@ -1,0 +1,39 @@
+name: Deploy Assets
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v4
+      - name: Download File from Private Repository
+        run: |
+          curl -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" -L "https://raw.githubusercontent.com/paulradley/cv/main/cv.7z" -o cv.7z
+      - name: Extract cv.7z
+        run: 7z x cv.7z
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

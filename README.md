@@ -1,1 +1,0 @@
-# paulradley.github.io
